@@ -8,6 +8,7 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
@@ -17,9 +18,23 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Initialize a UIRefreshControl
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshControlAction(refreshControl:)), for: UIControlEvents.valueChanged)
+        
+        // Setup the UITable
         tableView.dataSource = self
         tableView.delegate = self
-        self.getNowFeaturing()
+        
+        // Display HUD right before the request is made
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        
+        // add refresh control to table view
+        tableView.insertSubview(refreshControl, at: 0)
+        
+        //Do the gets from the API
+        self.getNowFeaturing(refreshControl: refreshControl)
 
     }
     
@@ -51,7 +66,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         return cell
     }
     
-    func getNowFeaturing(){
+    func getNowFeaturing(refreshControl: UIRefreshControl){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
@@ -60,11 +75,19 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             if let data = data {
                 if let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
                     self.movies = dataDictionary["results"] as! [NSDictionary]
+                    // Hide HUD once the network request comes back (must be done on main UI thread)
+                    MBProgressHUD.hide(for: self.view, animated: true)
                     self.tableView.reloadData()
+                    refreshControl.endRefreshing()
+
                 }
             }
         }
         task.resume()
+    }
+    
+    func refreshControlAction(refreshControl: UIRefreshControl) {
+        self.getNowFeaturing(refreshControl: refreshControl)
     }
     
 
