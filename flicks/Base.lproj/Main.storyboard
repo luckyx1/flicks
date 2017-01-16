@@ -49,6 +49,7 @@
                                                 </imageView>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" red="0.12971647110000001" green="0.13814260580000001" blue="0.394674411" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
                                             <outlet property="overviewLabel" destination="Xdp-iD-ltx" id="1j2-HH-IPU"/>
                                             <outlet property="posterView" destination="LXU-hO-Cy6" id="Hka-v1-8LQ"/>

@@ -48,21 +48,44 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
 
+    func fadeInImage(url: NSURL, poster: UIImageView){
+        let imageRequest = NSURLRequest(url: url as URL)
+        
+        poster.setImageWith(imageRequest as URLRequest, placeholderImage: nil, success: { (imageRequest, imageResponse, image) -> Void in
+            // imageResponse will be nil if the image is cached
+            if imageResponse != nil {
+                print("Image was NOT cached, fade in image")
+                poster.alpha = 0.0
+                poster.image = image
+                UIView.animate(withDuration: 1.0, animations: { () -> Void in
+                    poster.alpha = 3.0
+                })
+            } else {
+                print("Image was cached so just update the image")
+                poster.image = image
+            }
+        }, failure:  { (imageRequest, imageResponse, error) -> Void in
+            // do something for the failure condition
+        })
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell", for: indexPath) as! MovieCell
         
         let movie = self.movies![indexPath.row]
+        
         let title = movie["title"] as! String
-        let overview = movie["overview"] as! String
-        let posterPath = movie["poster_path"] as! String
-        let baseUrl = "https://image.tmdb.org/t/p/w500/"
-        let imageUrl = NSURL(string: baseUrl + posterPath)
-        
-        
         cell.titleLabel.text = title
+        
+        let overview = movie["overview"] as! String
         cell.overviewLabel.text = overview
-        cell.posterView.setImageWith(imageUrl as! URL)
+        
+        if let posterPath = movie["poster_path"] as? String{
+            let baseUrl = "https://image.tmdb.org/t/p/w500/"
+            let imageUrl = NSURL(string: baseUrl + posterPath)
+            self.fadeInImage(url: imageUrl!, poster: cell.imageView!)
+        }
+        
         
         return cell
     }
