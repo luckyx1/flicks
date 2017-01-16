@@ -115,6 +115,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             }else{
                 // Network issue, show proper msg and attempt connection again
                 self.networkErrorView.isHidden = false
+                
+                // Attempt API call again
+                self.getNowFeaturing(refreshControl: refreshControl)
             }
         }
         task.resume()
@@ -165,10 +168,12 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.reloadData()
     }
     
+    // Allows Search Bar to have cancel button
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         self.searchBar.showsCancelButton = true
     }
     
+    // Clears out search focus and pulls data when cancel is clicked
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.showsCancelButton = false
         searchBar.text = ""
