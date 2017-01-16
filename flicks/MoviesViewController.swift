@@ -14,6 +14,7 @@ import MBProgressHUD
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var networkErrorView: UIView!
     var movies: [NSDictionary]?
     
     override func viewDidLoad() {
@@ -27,11 +28,11 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.dataSource = self
         tableView.delegate = self
         
-        // Display HUD right before the request is made
-        MBProgressHUD.showAdded(to: self.view, animated: true)
         
         // add refresh control to table view
         tableView.insertSubview(refreshControl, at: 0)
+        
+        self.networkErrorView.isHidden = false
         
         //Do the gets from the API
         self.getNowFeaturing(refreshControl: refreshControl)
@@ -71,16 +72,27 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
+        
+        // Display HUD right before the request is made
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        
         let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
             if let data = data {
                 if let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
+                    self.networkErrorView.isHidden = true
+                    
                     self.movies = dataDictionary["results"] as! [NSDictionary]
+                    
                     // Hide HUD once the network request comes back (must be done on main UI thread)
                     MBProgressHUD.hide(for: self.view, animated: true)
+                    
                     self.tableView.reloadData()
                     refreshControl.endRefreshing()
 
                 }
+            }else{
+                // Network issue, show proper msg and attempt connection again
+                self.networkErrorView.isHidden = false
             }
         }
         task.resume()
