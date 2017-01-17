@@ -81,7 +81,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         if let posterPath = movie["poster_path"] as? String{
             let baseUrl = "https://image.tmdb.org/t/p/w500/"
             let imageUrl = NSURL(string: baseUrl + posterPath)
-            self.fadeInImage(url: imageUrl!, poster: cell.imageView!)
+            self.fadeInImage(url: imageUrl!, poster: cell.posterView)
         }
         
         return cell
