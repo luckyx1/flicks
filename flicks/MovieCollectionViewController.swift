@@ -10,12 +10,10 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class MovieCollectionViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
+class MovieCollectionViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var collectionView: UICollectionView!
-    
-    // Initialize a UIRefreshControl
-    let refreshControl = UIRefreshControl()
     
     // Hold the data locally from the API call
     var movies: [NSDictionary]?
@@ -24,21 +22,22 @@ class MovieCollectionViewController: UIViewController, UICollectionViewDataSourc
         super.viewDidLoad()
         collectionView.delegate = self
         collectionView.dataSource = self
-
-        // Do any additional setup after loading the view.
-        refreshControl.addTarget(self, action: #selector(refreshControlAction(refreshControl:)), for: UIControlEvents.valueChanged)
         
-        //Do the GET from the "The movies" API
-        self.getNowFeaturing(refreshControl: refreshControl)
+        flowLayout.scrollDirection = .vertical
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0)
+       
+
     }
     
     
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
-        return 3
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
+        return self.movies?.count ?? 0
     }
     
 
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell{
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell{
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "movieCollectCell", for: indexPath) as! MovieCollectionCell
         let movie = self.movies![indexPath.row]
         
@@ -56,44 +55,9 @@ class MovieCollectionViewController: UIViewController, UICollectionViewDataSourc
         return cell
     }
     
-    func refreshControlAction(refreshControl: UIRefreshControl) {
-        self.getNowFeaturing(refreshControl: refreshControl)
-    }
     
-    // API Get
     
-    func getNowFeaturing(refreshControl: UIRefreshControl){
-        let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
-        let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
-        let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
-        
-        // Display HUD right before the request is made
-        MBProgressHUD.showAdded(to: self.view, animated: true)
-        
-        let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
-            if let data = data {
-                if let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
-                    print("found data in collection")
-                    self.movies = dataDictionary["results"] as! [NSDictionary]
-                    
-                    // Hide HUD once the network request comes back (must be done on main UI thread)
-                    MBProgressHUD.hide(for: self.view, animated: true)
-                    
-                    self.collectionView.reloadData()
-                    refreshControl.endRefreshing()
-                    
-                }
-            }else{
-                print("didnt find data")
-                // Attempt API call again
-                self.getNowFeaturing(refreshControl: refreshControl)
-            }
-        }
-        task.resume()
-    }
 
-    
     // Fade in code
     
     func fadeInImage(url: NSURL, poster: UIImageView){

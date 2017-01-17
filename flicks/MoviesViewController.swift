@@ -181,6 +181,11 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         self.getNowFeaturing(refreshControl: refreshControl)
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let MovieCollectionController = segue.destination as! MovieCollectionViewController
+        MovieCollectionController.movies = self.movies        
+    }
+    
 
 
 }
