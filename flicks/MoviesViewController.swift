@@ -20,6 +20,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var networkErrorView: UIView!
     // Hold the data locally from the API call
     var movies: [NSDictionary]?
+    // Hold the endpoint (for the api call)
+    var endpoint: String!
     
     // Initialize a UIRefreshControl
     let refreshControl = UIRefreshControl()
@@ -27,6 +29,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     // View Controller code
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.navigationItem.title = "Movies"
         
         refreshControl.addTarget(self, action: #selector(refreshControlAction(refreshControl:)), for: UIControlEvents.valueChanged)
         
@@ -83,6 +87,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             let imageUrl = NSURL(string: baseUrl + posterPath)
             self.fadeInImage(url: imageUrl!, poster: cell.posterView)
         }
+        // Use a red color when the user selects the cell
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.blue
+        cell.selectedBackgroundView = backgroundView
         
         return cell
     }
@@ -91,7 +99,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func getNowFeaturing(refreshControl: UIRefreshControl){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
+        let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint!)?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         
@@ -182,8 +190,17 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let MovieCollectionController = segue.destination as! MovieCollectionViewController
-        MovieCollectionController.movies = self.movies        
+        if let cell = sender as? UITableViewCell{
+            let indexPath = tableView.indexPath(for: cell)
+            let movie = movies![indexPath!.row]
+            let detailsVC = segue.destination as! DetailViewController
+            detailsVC.movie = movie
+            
+        }else{
+            let MovieCollectionController = segue.destination as! MovieCollectionViewController
+            MovieCollectionController.movies = self.movies
+        }
+        
     }
     
 

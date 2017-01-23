@@ -16,6 +16,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        let nowPlayingNavCntr = storyboard.instantiateViewController(withIdentifier: "MoviesNavigationController") as! UINavigationController
+        let nowPlayingViewCntr = nowPlayingNavCntr.topViewController as! MoviesViewController
+        nowPlayingViewCntr.endpoint = "now_playing"
+        nowPlayingNavCntr.tabBarItem.title = "Now Playing"
+        //nowPlayingNavCntr.tabBarItem.image = UIImage(named: "now_showing")
+        
+        let topRatingNavCntr = storyboard.instantiateViewController(withIdentifier: "MoviesNavigationController") as! UINavigationController
+        let topRatingViewCntr = topRatingNavCntr.topViewController as! MoviesViewController
+        topRatingViewCntr.endpoint = "top_rated"
+        topRatingNavCntr.tabBarItem.title = "Top Rated"
+        //topRatingNavCntr.tabBarItem.image = UIImage(named: "top_rated")
+        
+        let tabBarCntr = UITabBarController()
+        tabBarCntr.viewControllers = [nowPlayingNavCntr, topRatingNavCntr]
+        
+        window?.rootViewController = tabBarCntr
+        window?.makeKeyAndVisible()
+        
+        
+        
+        
+        
+        
+        
         return true
     }
 
