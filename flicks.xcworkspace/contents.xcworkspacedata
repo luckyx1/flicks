@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Media.xcassets">
+      location = "group:flicks/Assets.xcassets">
    </FileRef>
    <FileRef
       location = "group:flicks.xcodeproj">
